@@ -2,3 +2,4 @@
   <mat-icon>local_fire_department</mat-icon>
   <span>Kanban Fire</span></mat-toolbar
 >
+<app-task *ngFor="let item of todo" [task]="item"></app-task>
