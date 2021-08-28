@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "kanbanfire-4317d": {
+      "hosting": {
+        "kanban-fire": [
+          "kanbanfire-4317d"
+        ]
+      }
+    }
+  }
+}
