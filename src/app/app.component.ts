@@ -1,12 +1,23 @@
 import { Component } from '@angular/core';
 import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { Observable } from 'rxjs';
+import {
+  AngularFirestore,
+  AngularFirestoreCollection,
+} from '@angular/fire/compat/firestore';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 import { Task } from './models/task';
 import { TaskDialogResult } from './models/TaskDialogResult';
 import { TaskDialogComponent } from './components/task-dialog/task-dialog.component';
+
+const getObservable = (collection: AngularFirestoreCollection<Task>) => {
+  const subject = new BehaviorSubject<Task[]>([]);
+  collection.valueChanges({ idField: 'id' }).subscribe((val: Task[]) => {
+    subject.next(val);
+  });
+  return subject;
+};
 
 @Component({
   selector: 'app-root',
@@ -15,15 +26,11 @@ import { TaskDialogComponent } from './components/task-dialog/task-dialog.compon
 })
 export class AppComponent {
   title = 'kanban-fire';
-  todo = this.store
-    .collection('todo')
-    .valueChanges({ idField: 'id' }) as Observable<Task[]>;
-  inProgress = this.store
-    .collection('inProgress')
-    .valueChanges({ idField: 'id' }) as Observable<Task[]>;
-  done = this.store
-    .collection('done')
-    .valueChanges({ idField: 'id' }) as Observable<Task[]>;
+  todo = getObservable(this.store.collection('todo')) as Observable<Task[]>;
+  inProgress = getObservable(this.store.collection('inProgress')) as Observable<
+    Task[]
+  >;
+  done = getObservable(this.store.collection('done')) as Observable<Task[]>;
 
   constructor(private dialog: MatDialog, private store: AngularFirestore) {}
 
@@ -57,21 +64,9 @@ export class AppComponent {
         this.store.collection(list).doc(task.id).update(task);
       }
     });
-    // dialogRef.afterClosed().subscribe((result: TaskDialogResult) => {
-    //   const dataList = this[list];
-    //   const taskIndex = dataList.indexOf(task);
-    //   if (result.delete) {
-    //     dataList.splice(taskIndex, 1);
-    //   } else {
-    //     dataList[taskIndex] = task;
-    //   }
-    // });
   }
 
   drop(event: CdkDragDrop<Task[] | null>): void {
-    // if (event === null) {
-    //   return;
-    // }
     if (event.previousContainer === event.container) {
       return;
     }
