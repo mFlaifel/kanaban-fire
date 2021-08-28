@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
+import { MatDialog } from '@angular/material/dialog';
 
 import { Task } from './models/task';
+import { TaskDialogResult } from './models/TaskDialogResult';
+import { TaskDialogComponent } from './components/task-dialog/task-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +13,22 @@ import { Task } from './models/task';
 })
 export class AppComponent {
   title = 'kanban-fire';
+  constructor(private dialog: MatDialog) {}
+
+  newTask(): void {
+    const dialogRef = this.dialog.open(TaskDialogComponent, {
+      width: '270px',
+      data: {
+        task: {},
+      },
+    });
+    dialogRef.afterClosed().subscribe((result: TaskDialogResult) => {
+      if (!result) {
+        return;
+      }
+      this.todo.push(result.task);
+    });
+  }
 
   todo: Task[] = [
     {
@@ -29,7 +48,6 @@ export class AppComponent {
   editTask(list: string, task: Task): void {}
 
   drop(event: CdkDragDrop<Task | any>): void {
-    console.log(`event`, event);
     if (event.previousContainer === event.container) {
       return;
     }
